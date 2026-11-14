@@ -1,0 +1,9 @@
+apiVersion: v2
+name: rungated
+description: "Runtime firewall for AI agents: LLM proxy, MCP proxy, egress proxy and decision API"
+type: application
+version: 0.10.0
+appVersion: "0.10.0"
+kubeVersion: ">=1.25.0-0"
+keywords: [ai, agents, security, llm, mcp, firewall]
+home: https://github.com/amareshhebbar/rungated

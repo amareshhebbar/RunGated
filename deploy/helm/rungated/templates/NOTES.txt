@@ -1,0 +1,18 @@
+Rungated {{ .Chart.AppVersion }} is installed as {{ include "rungated.fullname" . }}.
+
+Gateway:  http://{{ include "rungated.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}
+Egress:   http://{{ include "rungated.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.egressPort }}
+
+Point agents at the LLM proxy:
+  OPENAI_BASE_URL=http://{{ include "rungated.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}/llm/openai/v1
+  ANTHROPIC_BASE_URL=http://{{ include "rungated.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}/llm/anthropic
+
+Check health:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "rungated.fullname" . }} 8080:{{ .Values.service.port }}
+  curl localhost:8080/v1/health
+{{- if not .Values.secrets.apiKey }}
+{{- if not .Values.secrets.existingSecret }}
+
+No admin API key was set. Set secrets.apiKey or secrets.existingSecret before exposing the control API.
+{{- end }}
+{{- end }}

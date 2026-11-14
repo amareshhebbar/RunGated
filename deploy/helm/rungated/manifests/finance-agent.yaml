@@ -1,0 +1,34 @@
+apiVersion: rungated.dev/v0
+kind: Agent
+metadata:
+  id: finance-agent
+  name: Finance Assistant
+  owner: payments-team@acme.example
+  purpose: Answers questions about invoices and customer accounts for the finance team
+  tenant: acme
+  version: "1.0.0"
+spec:
+  model:
+    providers: [openai, anthropic]
+    allowed: ["gpt-4o*", "gpt-4.1*", "claude-*"]
+    maxTokensPerRequest: 16000
+  riskTier: high
+  autonomy:
+    default: auto_contain
+  dataClasses:
+    neverEgress: [pii.ssn, pci.*, secret.*]
+    neverModel: [secret.*]
+  tools:
+    - name: get_invoice
+      server: finance-mcp
+      description: Fetch one invoice by id
+      blastRadius: low
+      args:
+        invoice_id: {type: string, required: true, pattern: "^INV-[0-9]{6}$"}
+  mcpServers:
+    - name: finance-mcp
+      url: http://finance-mcp.default.svc:9301/mcp
+      pinning: tofu
+  egress:
+    allow: ["api.acme.example", "*.stripe.com"]
+    methods: [GET, POST]

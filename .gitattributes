@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.go text eol=lf
+*.sh text eol=lf
+internal/consoleui/assets/** linguist-generated=true
+sdk/typescript/dist/** linguist-generated=true
+pnpm-lock.yaml linguist-generated=true

@@ -1,0 +1,44 @@
+---
+title: "Slack approvals"
+---
+
+<Info>Slack approvals are part of Rungated Enterprise.</Info>
+
+When an action is held, Rungated posts it to a Slack channel with Approve and Deny buttons. The agent waits until someone decides or the approval times out.
+
+## 1. Create the Slack app
+
+1. Open [https://api.slack.com/apps](https://api.slack.com/apps), Create New App, From a manifest, pick your workspace.
+2. Paste `deploy/slack/app-manifest.yaml` from the Rungated repository. Replace `rungated.example.com` with the public HTTPS address of your gateway.
+3. Create, then Install to Workspace.
+4. Copy two values:
+    * OAuth and Permissions, Bot User OAuth Token (starts with `xoxb-`).
+    * Basic Information, Signing Secret.
+5. Invite the bot to the channel: `/invite @Rungated` in the channel.
+
+## 2. Configure the gateway
+
+```yaml
+slack:
+  bot_token: xoxb-...
+  channel: "#agent-approvals"
+  signing_secret: ...
+  allowed_users: ["U012ABCDEF", "U034GHIJKL"]
+console_url: https://rungated.example.com
+```
+
+Or with environment variables: `RUNGATED_SLACK_BOT_TOKEN`, `RUNGATED_SLACK_CHANNEL`, `RUNGATED_SLACK_SIGNING_SECRET`, `RUNGATED_SLACK_ALLOWED_USERS` (comma separated), `RUNGATED_CONSOLE_URL`.
+
+`allowed_users` lists the Slack member IDs that may approve. Find an ID in Slack: open the person's profile, More, Copy member ID. Leave it empty only if everyone in the channel may approve.
+
+## 3. Make the gateway reachable from Slack
+
+Slack must reach `https://<your gateway>/v1/integrations/slack/actions`. Expose only that path if the gateway is otherwise private, for example with an ingress rule or a Cloudflare Tunnel. Every request is checked against the signing secret and refused if it is older than five minutes.
+
+## 4. Test it
+
+Set an agent's autonomy to `human` or give a tool a high blast radius, trigger a risky action, and click Approve in Slack. The message updates with who decided, and the decision appears in the Console and the audit log as `slack:<username>`.
+
+## Webhook only
+
+With `webhook_url` instead of `bot_token`, Rungated posts notifications but buttons cannot work. Use the bot token for approvals.

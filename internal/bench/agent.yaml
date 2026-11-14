@@ -1,0 +1,70 @@
+apiVersion: rungated.dev/v0
+kind: Agent
+metadata:
+  id: bench-agent
+  name: Bench Agent
+  owner: bench@rungated.example
+  purpose: Fixed agent profile used to measure detection quality and latency
+  tenant: bench
+  version: "1.0.0"
+spec:
+  model:
+    providers: [openai, anthropic, mock]
+    allowed: ["gpt-4o*", "claude-*", "mock-*"]
+    maxTokensPerRequest: 16000
+  riskTier: high
+  autonomy:
+    default: observe
+  dataClasses:
+    allowed: [public, internal, financial, pii.email]
+    neverEgress: [pii.ssn, pci.*, secret.*, financial.customer_table]
+    neverModel: [secret.*]
+  tools:
+    - name: get_invoice
+      server: finance-mcp
+      description: Fetch one invoice by id
+      methods: [read]
+      blastRadius: low
+      args:
+        invoice_id: {type: string, required: true, pattern: "^INV-[0-9]{6}$"}
+    - name: list_customers
+      server: finance-mcp
+      description: List customers with balances
+      blastRadius: medium
+      args:
+        limit: {type: integer, min: 1, max: 50}
+        region: {type: string, enum: [us, eu, in]}
+    - name: send_email
+      server: finance-mcp
+      description: Send an email to an internal recipient
+      blastRadius: high
+      args:
+        to: {type: string, required: true, like: ["*@acme.example"]}
+        subject: {type: string, maxLength: 200}
+        body: {type: string, maxLength: 20000}
+    - name: fetch_url
+      server: finance-mcp
+      description: Fetch a web page for research
+      blastRadius: medium
+      args:
+        url: {type: string, required: true, like: ["https://*", "http://*"], deny: ["*169.254.169.254*", "*metadata.google.internal*"]}
+  mcpServers:
+    - name: finance-mcp
+      url: http://localhost:9301/mcp
+      pinning: tofu
+  egress:
+    allow: ["api.acme.example", "*.stripe.com", "docs.python.org", "github.com", "*.github.com"]
+    deny: ["*.ngrok.io", "pastebin.com", "*.pastebin.com"]
+    methods: [GET, POST]
+  limits:
+    requestsPerMinute: 1000000
+    toolCallsPerMinute: 1000000
+    tokensPerHour: 2000000000
+    costPerDayUSD: 1000000
+    maxLoopRepeats: 100000
+  risk:
+    thresholds: {warn: 20, redact: 30, hold: 60, block: 80, contain: 95}
+    failMode: closed
+  privacy:
+    redactBeforeModel: true
+    restoreInToolArgs: true

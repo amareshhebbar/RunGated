@@ -1,0 +1,58 @@
+---
+title: "Concepts"
+---
+
+## Actions and verdicts
+
+Everything an agent does is an **action**: a model request, a model response, a tool call, a tool result, an MCP resource, an outbound HTTP request or its response. Rungated turns each action into one of six **verdicts**.
+
+| Verdict | Meaning |
+| --- | --- |
+| `allow` | Proceed unchanged |
+| `warn` | Proceed, and record a warning |
+| `redact` | Proceed after sensitive values are replaced with tokens, or hidden instructions are removed |
+| `hold` | Wait for a human to approve or deny |
+| `block` | Refuse the action |
+| `contain` | Refuse, revoke the agent's tokens and stop the agent until a person releases it |
+
+## How a decision is made
+
+1. **Identify** the agent from its key, token or headers and load its manifest.
+2. **Policy.** The manifest is compiled to Cedar and evaluated in process. Tool allow lists, argument rules, egress lists, model lists and data classes are hard decisions.
+3. **Detect.** Tier 0 detectors run in microseconds: secrets, personal data, prompt injection patterns (with decoding of base64, hex, ROT13 and look alike characters), exfiltration patterns, rate, loop and cost limits. Tier 1 models (optional) add embedders, an injection classifier and named entity recognition, see [Models](/models/overview). Tier 2, in Enterprise, asks a model to judge held actions.
+4. **Score.** Findings are fused into a risk score from 0 to 100 using weights and the thresholds in the manifest.
+5. **Enforce.** The score maps to a verdict, and the agent's autonomy mode decides how much of that verdict is applied.
+
+The response always reports both `computed` (what the pipeline decided) and `verdict` (what was enforced).
+
+## Autonomy modes
+
+| Mode | Behaviour |
+| --- | --- |
+| `observe` | Record what would have happened, enforce nothing |
+| `recommend` | Enforce redaction only, advise on the rest |
+| `human` | Hold risky actions for a person |
+| `auto_contain` | Block and contain without waiting |
+| `full_auto` | Apply the computed verdict with no human step |
+
+Start every agent in `observe`, review a week of results, then move to enforcement. Change the mode at any time from the Console or with `PUT /v1/agents/{id}/mode`.
+
+## Risk thresholds
+
+The default thresholds are warn 20, redact 30, hold 60, block 80, contain 95. Set your own under `spec.risk.thresholds` in the manifest.
+
+## Redaction and the vault
+
+When a prompt contains a value such as an email address or an API key, Rungated replaces it with a session scoped token before the request reaches the model provider. The provider never sees the original. When the model answers with the token, Rungated restores the original for your user, including inside streamed output and tool arguments. Values are held encrypted in memory for the session.
+
+## Containment
+
+Containment is the kill switch. A contained agent has its tokens revoked, every further action refused, and a forensic snapshot written. A person releases it from the Console or with `POST /v1/release`.
+
+## Approvals
+
+A held action waits in the approvals queue. Approvers decide in the Console or through the API. Enterprise also notifies them in Slack or by email and lets them decide from there. Each manifest sets a timeout and what happens when it expires, deny by default.
+
+## MCP pinning
+
+Tool definitions from MCP servers are fingerprinted. With `pinning: tofu` a tool is trusted on first use. If its description or schema changes later, the tool is hidden and an approval is raised, which defeats rug pull attacks.

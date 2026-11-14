@@ -1,0 +1,27 @@
+{
+  "recall": 0.9978632478632479,
+  "fpr": 0,
+  "classes": {
+    "benign_document": 0,
+    "benign_egress": 0,
+    "benign_hard_negative": 0,
+    "benign_multilingual": 0,
+    "benign_request": 0,
+    "benign_tool_call": 0,
+    "exfil_egress": 1,
+    "injection_direct": 0.95,
+    "injection_indirect": 1,
+    "injection_mcp_resource": 1,
+    "injection_multilingual": 1,
+    "injection_tool_result": 1,
+    "pii_leak": 1,
+    "secret_leak": 1,
+    "tool_abuse": 1,
+    "tool_poisoning": 1
+  },
+  "max_p95_ms": 25,
+  "recall_tolerance": 0.005,
+  "fpr_tolerance": 0.005,
+  "min_cases": 627,
+  "generated_from": "0.10.0-phase1-pilot-ready"
+}

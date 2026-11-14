@@ -1,0 +1,36 @@
+---
+title: "Egress proxy"
+---
+
+The egress proxy controls which hosts an agent can reach. It listens on `egress_listen` (default `:8081`).
+
+## Use it
+
+Set the proxy for the agent process, with the agent id as the proxy user:
+
+```bash
+export HTTP_PROXY=http://finance-agent:@localhost:8081
+export HTTPS_PROXY=$HTTP_PROXY
+```
+
+Plain HTTP and CONNECT tunnels are checked against the manifest allow and deny lists, method limits and exfiltration detectors.
+
+## Inspect HTTPS bodies
+
+To scan HTTPS request and response bodies, turn on TLS interception and trust the Rungated CA in the agent:
+
+```bash
+export RUNGATED_EGRESS_INTERCEPT_TLS=true
+curl -o rungated-ca.pem http://localhost:8080/v1/egress/ca.pem
+export SSL_CERT_FILE=$PWD/rungated-ca.pem NODE_EXTRA_CA_CERTS=$PWD/rungated-ca.pem REQUESTS_CA_BUNDLE=$PWD/rungated-ca.pem
+```
+
+Without interception, HTTPS traffic is checked by host only.
+
+## Chaining
+
+Set `egress.parent_proxy` (or `RUNGATED_EGRESS_PARENT_PROXY`) to forward allowed traffic through a corporate proxy.
+
+<Warning>
+The egress proxy only protects an agent that has no other route out. Pair it with a network policy that blocks direct internet access.
+</Warning>

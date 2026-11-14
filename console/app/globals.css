@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="dark"] {
+  --bg: 10 12 16;
+  --panel: 17 20 26;
+  --raised: 25 29 37;
+  --line: 40 46 58;
+  --fg: 226 232 240;
+  --muted: 128 138 156;
+  --accent: 96 165 250;
+  --allow: 52 211 153;
+  --warn: 251 191 36;
+  --redact: 96 165 250;
+  --hold: 167 139 250;
+  --block: 248 113 113;
+  --contain: 220 38 38;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: 246 247 249;
+  --panel: 255 255 255;
+  --raised: 241 243 246;
+  --line: 217 222 230;
+  --fg: 17 24 39;
+  --muted: 100 110 128;
+  --accent: 37 99 235;
+  --allow: 5 150 105;
+  --warn: 180 120 0;
+  --redact: 37 99 235;
+  --hold: 124 58 237;
+  --block: 220 38 38;
+  --contain: 153 27 27;
+  color-scheme: light;
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+* {
+  border-color: rgb(var(--line));
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.3);
+}
+
+@layer components {
+  .card {
+    @apply rounded-md border border-line bg-panel;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1 rounded border border-line bg-raised px-2.5 py-1 text-xs font-medium text-fg transition-colors hover:border-accent disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-accent bg-accent text-bg hover:opacity-90;
+  }
+  .btn-danger {
+    @apply border-block text-block hover:bg-block/10;
+  }
+  .btn-ok {
+    @apply border-allow text-allow hover:bg-allow/10;
+  }
+  .input {
+    @apply w-full rounded border border-line bg-bg px-2 py-1 text-xs text-fg outline-none focus:border-accent;
+  }
+  .th {
+    @apply whitespace-nowrap px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted;
+  }
+  .td {
+    @apply px-3 py-2 align-top;
+  }
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-wide text-muted;
+  }
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgb(var(--line));
+  border-radius: 4px;
+}

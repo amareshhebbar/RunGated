@@ -1,0 +1,116 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "aspen",
+  "name": "Rungated",
+  "description": "Runtime security gateway for AI agents.",
+  "colors": {
+    "primary": "#0B8F55",
+    "light": "#3EE08F",
+    "dark": "#0B8F55"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://github.com/amareshhebbar/rungated"
+  },
+  "background": {
+    "color": {
+      "light": "#FFFFFF",
+      "dark": "#08090D"
+    },
+    "decoration": "grid"
+  },
+  "fonts": {
+    "heading": {
+      "family": "Space Grotesk",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter"
+    }
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "styling": {
+    "codeblocks": "dark",
+    "eyebrows": "breadcrumbs"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Models",
+        "href": "/models/overview"
+      },
+      {
+        "label": "Enterprise",
+        "href": "/editions"
+      }
+    ],
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/amareshhebbar/rungated"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Docs",
+        "icon": "book-open",
+        "groups": [
+          {
+            "group": "Start",
+            "pages": ["index", "quickstart", "concepts", "editions"]
+          },
+          {
+            "group": "Guides",
+            "pages": ["guides/langgraph", "guides/openai_agents", "guides/vercel_ai_sdk", "guides/learn_rulebook"]
+          },
+          {
+            "group": "Connect",
+            "pages": ["connect/llm_proxy", "connect/mcp", "connect/egress", "connect/decision_api", "connect/python_sdk", "connect/typescript_sdk"]
+          },
+          {
+            "group": "Models",
+            "pages": ["models/overview", "models/local", "models/hosted", "models/your_own"]
+          },
+          {
+            "group": "Self hosting",
+            "pages": ["self_hosting/docker", "self_hosting/kubernetes", "self_hosting/configuration", "self_hosting/operations"]
+          },
+          {
+            "group": "Security",
+            "pages": ["security/data_handling", "security/failure_modes", "security/limits"]
+          },
+          {
+            "group": "Enterprise",
+            "pages": ["enterprise/overview", "enterprise/slack", "enterprise/airgap"]
+          },
+          {
+            "group": "Project",
+            "pages": ["faq", "changelog"]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "icon": "code",
+        "groups": [
+          {
+            "group": "Reference",
+            "pages": ["reference/cli", "reference/api", "reference/manifest"]
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/amareshhebbar/rungated"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude"]
+  }
+}

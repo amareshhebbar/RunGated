@@ -1,0 +1,37 @@
+apiVersion: rungated.dev/v0
+kind: Agent
+metadata:
+  id: quickstart-agent
+  name: Quickstart Support Agent
+  owner: you@example.com
+  purpose: Looks up orders and issues small refunds
+  tenant: quickstart
+  version: "1.0.0"
+spec:
+  model:
+    providers: [openai, anthropic]
+    allowed: ["gpt-4o*", "claude-*"]
+  riskTier: medium
+  autonomy:
+    default: auto_contain
+  dataClasses:
+    allowed: [public, internal, pii.email]
+    neverEgress: [pii.ssn, pci.*, secret.*]
+  tools:
+    - name: lookup_order
+      server: orders
+      description: Fetch one order by id
+      blastRadius: low
+      args:
+        order_id: {type: string, required: true, pattern: "^ORD-[0-9]{5}$"}
+    - name: issue_refund
+      server: orders
+      description: Refund up to 100 dollars on an order
+      blastRadius: high
+      args:
+        order_id: {type: string, required: true, pattern: "^ORD-[0-9]{5}$"}
+        amount: {type: number, required: true, min: 1, max: 100}
+  egress:
+    allow: ["api.example.com"]
+  risk:
+    failMode: closed

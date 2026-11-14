@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rungated.dev/schemas/ats/manifest.v0.schema.json",
+  "title": "Agent Trust Specification manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "spec"],
+  "properties": {
+    "apiVersion": {"const": "rungated.dev/v0"},
+    "kind": {"const": "Agent"},
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "owner", "purpose"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name": {"type": "string"},
+        "owner": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "purpose": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "tenant": {"$ref": "#/$defs/id"},
+        "version": {"type": "string"},
+        "labels": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model"],
+      "properties": {
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed"],
+          "properties": {
+            "providers": {"type": "array", "items": {"type": "string"}},
+            "allowed": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+            "maxTokensPerRequest": {"type": "integer", "minimum": 0}
+          }
+        },
+        "riskTier": {"enum": ["low", "medium", "high", "critical"]},
+        "autonomy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "default": {"$ref": "#/$defs/mode"},
+            "overrides": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["mode"],
+                "anyOf": [{"required": ["actionClass"]}, {"required": ["tool"]}],
+                "properties": {
+                  "actionClass": {"enum": ["llm.request", "llm.response", "tool.call", "tool.result", "mcp.tools_list", "mcp.resource", "mcp.prompt", "egress.request", "egress.response", "*"]},
+                  "tool": {"type": "string"},
+                  "mode": {"$ref": "#/$defs/mode"}
+                }
+              }
+            }
+          }
+        },
+        "dataClasses": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowed": {"$ref": "#/$defs/stringList"},
+            "neverEgress": {"$ref": "#/$defs/stringList"},
+            "neverModel": {"$ref": "#/$defs/stringList"}
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": {"type": "string", "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"},
+              "server": {"type": "string"},
+              "description": {"type": "string"},
+              "methods": {"$ref": "#/$defs/stringList"},
+              "args": {"type": "object", "additionalProperties": {"$ref": "#/$defs/argRule"}},
+              "allowExtraArgs": {"type": "boolean"},
+              "blastRadius": {"enum": ["low", "medium", "high"]},
+              "dataClasses": {"$ref": "#/$defs/stringList"},
+              "requireApproval": {"type": "boolean"}
+            }
+          }
+        },
+        "mcpServers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "anyOf": [{"required": ["url"]}, {"required": ["command"]}],
+            "properties": {
+              "name": {"$ref": "#/$defs/id"},
+              "url": {"type": "string", "minLength": 1},
+              "command": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+              "headers": {"type": "object", "additionalProperties": {"type": "string"}},
+              "pinning": {"enum": ["tofu", "strict", "off"]}
+            }
+          }
+        },
+        "egress": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allow": {"$ref": "#/$defs/stringList"},
+            "deny": {"$ref": "#/$defs/stringList"},
+            "methods": {"$ref": "#/$defs/stringList"},
+            "scanBodies": {"type": "boolean"},
+            "maxBodyKB": {"type": "integer", "minimum": 0}
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requestsPerMinute": {"type": "integer", "minimum": 0},
+            "toolCallsPerMinute": {"type": "integer", "minimum": 0},
+            "tokensPerHour": {"type": "integer", "minimum": 0},
+            "costPerDayUSD": {"type": "number", "minimum": 0},
+            "maxLoopRepeats": {"type": "integer", "minimum": 0},
+            "egressBytesPerHour": {"type": "integer", "minimum": 0}
+          }
+        },
+        "risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "thresholds": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "warn": {"$ref": "#/$defs/score"},
+                "redact": {"$ref": "#/$defs/score"},
+                "hold": {"$ref": "#/$defs/score"},
+                "block": {"$ref": "#/$defs/score"},
+                "contain": {"$ref": "#/$defs/score"}
+              }
+            },
+            "failMode": {"enum": ["open", "closed"]},
+            "weights": {"type": "object", "additionalProperties": {"type": "number"}},
+            "judgeOnHold": {"type": "boolean"},
+            "judgeCanRelease": {"type": "boolean"}
+          }
+        },
+        "escalation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "approvers": {"$ref": "#/$defs/stringList"},
+            "slackChannel": {"type": "string"},
+            "timeoutSeconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+            "onTimeout": {"enum": ["deny", "allow"]}
+          }
+        },
+        "privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "redactBeforeModel": {"type": "boolean"},
+            "restoreInToolArgs": {"type": "boolean"},
+            "redactClasses": {"$ref": "#/$defs/stringList"},
+            "storeContent": {"type": "boolean"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,62}$"},
+    "mode": {"enum": ["observe", "recommend", "human", "auto_contain", "full_auto"]},
+    "score": {"type": "integer", "minimum": 0, "maximum": 100},
+    "stringList": {"type": "array", "items": {"type": "string"}},
+    "argRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["string", "integer", "number", "boolean", "array", "object", "any"]},
+        "required": {"type": "boolean"},
+        "enum": {"$ref": "#/$defs/stringList"},
+        "like": {"$ref": "#/$defs/stringList"},
+        "pattern": {"type": "string"},
+        "min": {"type": "number"},
+        "max": {"type": "number"},
+        "maxLength": {"type": "integer", "minimum": 0},
+        "deny": {"$ref": "#/$defs/stringList"}
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+apiVersion: rungated.dev/v0
+kind: Agent
+metadata:
+  id: acme-support
+  name: Acme Support Assistant
+  owner: support@northwind.example
+  purpose: Answers order questions and issues small refunds for customers
+  tenant: northwind
+  version: "1.0.0"
+spec:
+  model:
+    providers: [openai, mock]
+    allowed: ["gpt-4o*", "mock-*"]
+    maxTokensPerRequest: 8000
+  riskTier: medium
+  autonomy:
+    default: auto_contain
+  dataClasses:
+    allowed: [public, internal, pii.email]
+    neverEgress: [pii.ssn, pci.*, secret.*]
+    neverModel: [secret.*]
+  tools:
+    - name: lookup_order
+      server: orders-mcp
+      description: Fetch one order by id
+      blastRadius: low
+      args:
+        order_id: {type: string, required: true, pattern: "^ORD-[0-9]{5}$"}
+    - name: issue_refund
+      server: orders-mcp
+      description: Refund up to 100 dollars on an order
+      blastRadius: high
+      args:
+        order_id: {type: string, required: true, pattern: "^ORD-[0-9]{5}$"}
+        amount: {type: number, required: true, min: 1, max: 100}
+  mcpServers:
+    - name: orders-mcp
+      url: http://127.0.0.1:9301/mcp
+      pinning: tofu
+  egress:
+    allow: ["api.northwind.example"]
+    methods: [GET]
+  limits:
+    requestsPerMinute: 60
+    toolCallsPerMinute: 30
+    maxLoopRepeats: 5
+  risk:
+    thresholds: {warn: 20, redact: 30, hold: 60, block: 80, contain: 95}
+    failMode: closed
+  escalation:
+    approvers: [support-lead@northwind.example]
+    timeoutSeconds: 60
+    onTimeout: deny
+  privacy:
+    redactBeforeModel: true
+    restoreInToolArgs: true

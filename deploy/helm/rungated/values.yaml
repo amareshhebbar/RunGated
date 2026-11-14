@@ -1,0 +1,150 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/amareshhebbar/rungated
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+onnx:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+service:
+  type: ClusterIP
+  port: 8080
+  egressPort: 8081
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: rungated.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+config:
+  store:
+    kind: embedded
+  bus:
+    kind: local
+  unknown_agents: reject
+  auth:
+    require_agent_auth: true
+  upstreams:
+    openai:
+      base_url: https://api.openai.com/v1
+      api_key_env: OPENAI_API_KEY
+    anthropic:
+      base_url: https://api.anthropic.com/v1
+      api_key_env: ANTHROPIC_API_KEY
+  egress:
+    intercept_tls: false
+    max_scan_kb: 512
+
+secrets:
+  existingSecret: ""
+  apiKey: ""
+  masterKey: ""
+  databaseUrl: ""
+  openaiApiKey: ""
+  anthropicApiKey: ""
+  slackBotToken: ""
+  slackSigningSecret: ""
+  clickhousePassword: ""
+
+extraEnv: []
+extraEnvFrom: []
+
+manifests:
+  existingConfigMap: ""
+  inline: {}
+  includeExamples: false
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+tier1:
+  enabled: false
+  modelsClaim: ""
+  libraryPath: /usr/local/lib/libonnxruntime.so
+  classifierPath: /models/injection/model.int8.onnx
+  nerPath: ""
+  tokenizerPath: /models/injection/tokenizer.json
+  nerTokenizerPath: ""
+  nerLabelsPath: ""
+  maxLen: 256
+  threshold: 0.5
+  temperature: 1.0
+  timeoutMs: 40
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+networkPolicy:
+  enabled: false
+  allowedPodLabels: {}
+  allowedNamespaceLabels: {}
+
+monitoring:
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    labels: {}
+    secretName: ""
+    secretKey: RUNGATED_API_KEY
+
+probes:
+  initialDelaySeconds: 3
+  periodSeconds: 10

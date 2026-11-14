@@ -1,0 +1,64 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "17 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go run ./cmd/rungated bench run --gate
+
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make sdk-py
+      - run: scripts/record-benchmarks.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-record
+          path: bench/results
+
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: |
+          go test ./internal/vault -run XXX -fuzz FuzzRedactRestore -fuzztime 300s
+          go test ./internal/sse -run XXX -fuzz FuzzSSE -fuzztime 180s
+          go test ./internal/llmproxy -run XXX -fuzz FuzzExtractRequest -fuzztime 180s
+          go test ./internal/mcpproxy -run XXX -fuzz FuzzParse -fuzztime 180s
+          go test ./internal/tokenizer -run XXX -fuzz FuzzEncode -fuzztime 180s
+
+  load:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: grafana/setup-k6-action@v1
+      - run: go build -o bin/rungated ./cmd/rungated
+      - run: |
+          ./bin/rungated serve --dev --data "$RUNNER_TEMP/data" --manifests spec/ats/examples &
+          for i in $(seq 1 30); do curl -fsS localhost:8080/v1/health && break; sleep 1; done
+          k6 run bench/k6/decide.js

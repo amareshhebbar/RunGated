@@ -1,0 +1,4 @@
+host:   fedora
+cpu:    AMD Ryzen 7 4800H with Radeon Graphics x 14
+memory: 15 GB
+kernel: 7.2.8-200.fc44.x86_64

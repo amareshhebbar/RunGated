@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "acme-support"
+version = "0.1.0"
+description = "Example customer support agent that uses Rungated as an external dependency"
+requires-python = ">=3.9"
+dependencies = ["rungated", "openai>=1.40"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["acme_support"]

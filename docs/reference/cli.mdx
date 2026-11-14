@@ -1,0 +1,29 @@
+---
+title: "CLI reference"
+---
+
+```
+rungated <command>
+
+  serve [--config F] [--listen :8080] [--data DIR] [--dev] [--manifests PATHS]
+  validate <rungated.agent.yaml>
+  compile-policy <rungated.agent.yaml>
+  token --gateway URL --agent ID (--key K | --api-key K) [--session S] [--ttl N]
+  agents register <file> --gateway URL --api-key K [--rotate-key]
+  agents list --gateway URL --api-key K
+  audit verify [--gateway URL --api-key K | --config F | --data DIR]
+  mcp-stdio --gateway URL --server NAME --agent ID (--key K | --token T) -- command args...
+  tier1 bench --classifier F [--ner F] [--tokenizer F] ...
+  bench gen|run
+  demo <mock-llm|poisoned-mcp|evil-web> [--listen ADDR]
+  models list
+  models pull ID [--dir D]
+  models path ID [--dir D]
+  models status [--api-key K] [--url U]
+  version
+  edition
+```
+
+`models list` shows every model and how to get it. `models pull` downloads a free model and checks its SHA256. `models status` shows your hosted plan and how many trial days are left. `version` prints the version and `edition` prints `free` or `enterprise`.
+
+`validate` checks a manifest against the schema. `compile-policy` prints the Cedar policy that the manifest produces.

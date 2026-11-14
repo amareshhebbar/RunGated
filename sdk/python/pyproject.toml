@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rungated"
+version = "0.10.0"
+description = "Python SDK for the Rungated runtime AI agent firewall"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Rungated" }]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Security",
+]
+
+dependencies = ["httpx>=0.25"]
+
+[project.urls]
+Homepage = "https://rungated.com"
+Documentation = "https://docs.rungated.com"
+
+[project.optional-dependencies]
+openai = ["openai>=1.40"]
+anthropic = ["anthropic>=0.40"]
+langgraph = ["langgraph>=0.2", "langchain-core>=0.3"]
+openai-agents = ["openai-agents>=0.1"]
+yaml = ["pyyaml>=6"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "openai", "anthropic", "langgraph", "langchain-core", "openai-agents", "pyyaml"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["rungated"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

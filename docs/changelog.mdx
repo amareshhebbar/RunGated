@@ -1,0 +1,17 @@
+---
+title: "Changelog"
+---
+
+## Unreleased
+
+Rungated is now open source under Apache 2.0, with an Enterprise edition built from the same code. New models: two free forever models you can download and six hosted models you can try free for 30 or 14 days, with automatic fallback to local models when a trial ends. Local embedders score text by similarity to a bank of known attacks. `rungated models list`, `pull`, `path` and `status`. `rungated edition` and `/v1/version` show the edition.
+
+Feedback buttons in the Console and a feedback API, so teams can mark decisions right or wrong. Text split across message parts is checked as a whole. Sensitive data types an agent's rulebook does not allow are held when they leave, even to allowed hosts. Requests typed by a user that ask to move data, read credentials or run code are no longer softened. Bounded memory: events kept in memory are capped (`store.memory_events`, default 20,000), older audit records are read from disk, incidents and finished approvals are pruned, and the event log rotates at 256 MB. Ten minute guides for LangGraph, the OpenAI Agents SDK and the Vercel AI SDK with runnable examples. `rungated init` writes a starter rulebook, or learns one from an agent's recorded traffic with `--from-gateway` or `--from-events`. Release builds for macOS and Windows, and a one line installer with checksum verification.
+
+## 0.10.0
+
+Slack approvals can be limited to named users. The image creates and owns its data volume, so a fresh named volume starts as a non root user. The Helm ServiceMonitor sends the bearer key that the metrics endpoint requires. Added image, kind cluster and load smoke checks, a Tier 1 training script and a landing page.
+
+## 0.9.0
+
+First public layout of the docs. Gateway with LLM proxy, MCP proxy, egress proxy and decision API. Cedar policy, tiered detectors, risk fusion, six verdicts. Console, Python and TypeScript SDKs.

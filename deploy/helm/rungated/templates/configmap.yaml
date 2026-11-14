@@ -1,0 +1,29 @@
+{{- include "rungated.validate" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rungated.fullname" . }}
+  labels:
+    {{- include "rungated.labels" . | nindent 4 }}
+data:
+  rungated.yaml: |
+    {{- include "rungated.config" . | nindent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rungated.fullname" . }}-manifests
+  labels:
+    {{- include "rungated.labels" . | nindent 4 }}
+data:
+  {{- range $name, $body := .Values.manifests.inline }}
+  {{ $name }}: |
+    {{- $body | nindent 4 }}
+  {{- end }}
+  {{- if .Values.manifests.includeExamples }}
+  finance-agent.yaml: |
+    {{- .Files.Get "manifests/finance-agent.yaml" | nindent 4 }}
+  {{- end }}
+  {{- if and (not .Values.manifests.inline) (not .Values.manifests.includeExamples) }}
+  {}
+  {{- end }}

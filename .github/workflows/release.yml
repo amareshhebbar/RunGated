@@ -1,0 +1,105 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TAGS=""
+          case "$GITHUB_REPOSITORY" in *-enterprise) TAGS="-tags enterprise" ;; esac
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+            os="${target%/*}"
+            arch="${target#*/}"
+            ext=""
+            if [ "$os" = windows ]; then ext=".exe"; fi
+            CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath $TAGS -ldflags "-s -w -X main.version=$VERSION" -o dist/rungated-$os-$arch$ext ./cmd/rungated
+          done
+          cp scripts/install.sh dist/install.sh
+          (cd dist && sha256sum rungated-* > SHA256SUMS)
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          echo "repo=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/docker/Dockerfile
+          target: runtime
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            EDITION=${{ endsWith(github.repository, '-enterprise') && 'enterprise' || 'free' }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.repo }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.repo }}:latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/docker/Dockerfile
+          target: runtime-onnx
+          build-args: |
+            ONNX=true
+            VERSION=${{ steps.meta.outputs.version }}
+            EDITION=${{ endsWith(github.repository, '-enterprise') && 'enterprise' || 'free' }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.repo }}:${{ steps.meta.outputs.version }}-onnx
+
+  verify:
+    needs: [images]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          REPO="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker pull "$REPO:$VERSION"
+          scripts/verify-image.sh "$REPO:$VERSION" "$VERSION"
+          docker pull "$REPO:$VERSION-onnx"
+          PORT=18490 EPORT=18491 scripts/verify-image.sh "$REPO:$VERSION-onnx" "$VERSION"
+
+  chart:
+    if: ${{ !endsWith(github.repository, '-enterprise') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          helm lint deploy/helm/rungated
+          helm package deploy/helm/rungated --version "$VERSION" --app-version "$VERSION" -d dist
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+          helm push dist/rungated-$VERSION.tgz "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts"

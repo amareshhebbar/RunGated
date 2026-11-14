@@ -1,0 +1,11 @@
+listen: ":8080"
+egress_listen: ":8081"
+data_dir: /data
+store:
+  kind: embedded
+bus:
+  kind: local
+upstreams:
+  openai:
+    base_url: http://mock-llm:9300/v1
+    api_key: demo
