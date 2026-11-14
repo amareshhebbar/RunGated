@@ -1,4 +1,4 @@
-.PHONY: init-smoke dist quickstart load-docker bump k6-smoke tools-k6 tools tools-docker tools-onnx test-full image verify-image kind e2e examples test-all build test race bench bench-gate bench-load outage live record schema verify fuzz vet smoke console sdk-py sdk-ts sdk-test demo build-onnx test-onnx
+.PHONY: docs-build init-smoke dist quickstart load-docker bump k6-smoke tools-k6 tools tools-docker tools-onnx test-full image verify-image kind e2e examples test-all build test race bench bench-gate bench-load outage live record schema verify fuzz vet smoke console sdk-py sdk-ts sdk-test demo build-onnx test-onnx
 
 build:
 	go build -o bin/rungated ./cmd/rungated
@@ -72,7 +72,10 @@ test-onnx:
 PY ?= sdk/python/.venv/bin/python
 
 docs:
-	cd docs && mint dev
+	mkdocs serve -f mkdocs.yml -a 127.0.0.1:8000
+
+docs-build:
+	mkdocs build --strict -f mkdocs.yml
 
 e2e: build
 	$(PY) -m pytest -q tests/e2e

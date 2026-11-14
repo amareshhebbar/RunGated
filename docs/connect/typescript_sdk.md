@@ -1,0 +1,50 @@
+# TypeScript SDK
+
+Node 18 or newer, no runtime dependencies.
+
+```bash
+npm install @rungated/sdk
+```
+
+## Route LLM traffic
+
+```ts
+import OpenAI from "openai";
+import { Rungated } from "@rungated/sdk";
+
+const rg = new Rungated({
+  gateway: "http://127.0.0.1:8080",
+  agentId: "finance-agent",
+  agentKey: process.env.RUNGATED_AGENT_KEY,
+});
+
+const openai = new OpenAI(rg.llmOptions("openai"));
+```
+
+## Guard a tool
+
+```ts
+import { protect } from "@rungated/sdk";
+
+const getInvoice = protect(
+  rg,
+  async (a: { invoice_id: string }) => lookup(a.invoice_id),
+  { name: "get_invoice", server: "finance-mcp" },
+);
+```
+
+If the gateway answers `block` or `contain`, `protect` throws `ActionBlocked` or `AgentContained`. A `hold` waits for an approval and throws `ApprovalDenied` if a person denies it. A `redact` verdict passes the redacted arguments to your function.
+
+## Adapters
+
+* `protectLangChainTools`
+* `protectAiSdkTools`
+* `protectOpenAIAgentTools`
+
+## Environment variables
+
+`RUNGATED_GATEWAY`, `RUNGATED_AGENT`, `RUNGATED_AGENT_KEY`, `RUNGATED_TOKEN`, `RUNGATED_API_KEY`, `RUNGATED_SESSION`.
+
+## Failure behaviour
+
+By default the SDK fails closed: if the gateway cannot be reached within the timeout, it throws `GatewayError` and the action does not run. Pass `failOpen: true` to allow instead. See [Failure modes](../security/failure_modes.md).

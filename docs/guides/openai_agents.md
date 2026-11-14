@@ -1,0 +1,57 @@
+# OpenAI Agents SDK in 10 minutes
+
+Protect the function tools of an agent built with the OpenAI Agents SDK, and route its model calls through Rungated.
+
+## 1. Start the gateway and register the agent
+
+Follow steps 1 and 2 of the [LangGraph guide](langgraph.md). The `agent.yaml` is the same.
+
+## 2. Install
+
+```bash
+pip install rungated openai-agents
+export RUNGATED_GATEWAY=http://localhost:8080
+export RUNGATED_AGENT_KEY=<agent key>
+```
+
+## 3. Wrap the tools and the client
+
+```python
+from agents import Agent, Runner, function_tool
+
+from rungated import Rungated
+from rungated.integrations.openai_agents import protect_function_tools, use_gateway
+
+rg = Rungated(agent_id="support-agent")
+use_gateway(rg)
+
+@function_tool
+def lookup_order(order_id: str) -> str:
+    ...
+
+@function_tool
+def issue_refund(order_id: str, amount: float) -> str:
+    ...
+
+agent = Agent(
+    name="Support",
+    instructions="Help customers with orders.",
+    tools=protect_function_tools(rg, [lookup_order, issue_refund], server="orders"),
+)
+
+result = Runner.run_sync(agent, "Refund 40 dollars on ORD-10042")
+```
+
+`use_gateway` makes the SDK send every model call through Rungated. `protect_function_tools` checks each tool call before it runs and each result before the model sees it. A blocked call returns a short refusal string, so the agent keeps running.
+
+## 4. See it work
+
+Open the Console at [http://localhost:8080](http://localhost:8080) and watch **Live**.
+
+## Runnable example
+
+`examples/quickstart/openai_agents_example.py` runs the same four calls as the LangGraph example without needing an OpenAI key:
+
+```bash
+bash examples/quickstart/run.sh python
+```

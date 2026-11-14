@@ -1,0 +1,21 @@
+# Air gapped install
+
+!!! info
+
+    The air gapped bundle is part of Rungated Enterprise.
+
+For networks with no outbound access, build one offline bundle:
+
+```bash
+VERSION=0.10.0 MODELS_DIR=ml/work/export SIGN_KEY=signing.pem deploy/airgap/build-bundle.sh
+```
+
+On the target machine:
+
+```bash
+tar xzf rungated-airgap-0.10.0.tar.gz
+cd rungated-airgap-0.10.0
+VERIFY_KEY=signing.pub ./install.sh
+```
+
+The installer checks every checksum, verifies the signature when you give it a public key, loads the images and installs the binary for the host architecture.

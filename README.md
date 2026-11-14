@@ -94,11 +94,11 @@ Enterprise and model keys: hebbar.gvamaresh@gmail.com
 
 ## Docs
 
-Everything else is in [`docs/`](docs): quickstart, guides for LangGraph, OpenAI Agents and the Vercel AI SDK, configuration, deployment and the full API.
+Read them at https://rungated.readthedocs.io: quickstart, guides for LangGraph, OpenAI Agents and the Vercel AI SDK, models, configuration, deployment and the full API. The source is in [`docs/`](docs).
 
 ## What it does not do
 
-Rungated does not stop prompt injection in general, and it cannot protect an agent that skips the gateway. It enforces the rules you declare and detects known attack patterns. See `docs/security/limits.mdx`.
+Rungated does not stop prompt injection in general, and it cannot protect an agent that skips the gateway. It enforces the rules you declare and detects known attack patterns. See `docs/security/limits.md`.
 
 ## License
 

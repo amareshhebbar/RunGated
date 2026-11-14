@@ -1,0 +1,52 @@
+# Manifest reference
+
+Every agent is described by one manifest, `apiVersion: rungated.dev/v0`, `kind: Agent`. YAML and JSON are both accepted. Unknown fields are rejected. The machine readable schema is `spec/ats/manifest.v0.schema.json` and is kept in step with the Go structs by a test in `pkg/manifest`. Validate files with `python3 scripts/validate-schema.py`.
+
+A complete example is `spec/ats/examples/finance-agent.yaml`.
+
+## metadata
+
+| Field | Required | Meaning |
+|---|---|---|
+| id | yes | Lowercase identifier, `^[a-z0-9][a-z0-9._-]{0,62}$` |
+| owner | yes | Accountable team or person |
+| purpose | yes | What the agent is for |
+| name, tenant, version, labels | no | Descriptive |
+
+## spec
+
+| Field | Meaning |
+|---|---|
+| model.providers, model.allowed, model.maxTokensPerRequest | Providers and glob patterns of models the agent may call |
+| riskTier | low, medium, high, critical |
+| autonomy.default, autonomy.overrides | Mode per agent, per tool or per action class: observe, recommend, human, auto_contain, full_auto |
+| dataClasses.allowed, neverEgress, neverModel | Data classes with glob patterns such as `pii.ssn` or `secret.*` |
+| tools | Allowed tools with arguments, blast radius and approval requirement |
+| mcpServers | MCP servers the agent may use, with pinning mode |
+| egress.allow, deny, methods, scanBodies, maxBodyKB | Network policy for the egress proxy |
+| limits | Requests, tool calls, tokens, cost, loop repeats and egress bytes |
+| risk.thresholds, failMode, weights, judgeOnHold, judgeCanRelease | Scoring and failure behaviour |
+| escalation | Approvers, Slack channel (Enterprise), timeout and what happens on timeout |
+| privacy | Redaction before the model, restore in tool arguments, redaction classes, content storage |
+
+## tools
+
+| Field | Meaning |
+|---|---|
+| name | Tool name |
+| server | MCP server that hosts the tool |
+| methods | Allowed methods or verbs |
+| blastRadius | low, medium, high |
+| requireApproval | Always hold before running |
+| allowExtraArgs | Accept arguments that are not listed |
+| args | Map of argument name to rule |
+
+Argument rule fields: `type` (string, integer, number, boolean, array, object, any), `required`, `enum`, `like` (glob allow list), `pattern` (regular expression), `min`, `max`, `maxLength`, `deny` (glob deny list).
+
+## risk.thresholds
+
+Defaults: warn 20, redact 30, hold 60, block 80, contain 95. A score at or above a threshold selects that verdict. Values must be increasing.
+
+## action classes
+
+`llm.request`, `llm.response`, `tool.call`, `tool.result`, `mcp.tools_list`, `mcp.resource`, `mcp.prompt`, `egress.request`, `egress.response`, and `*`.

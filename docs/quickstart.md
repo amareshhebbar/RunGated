@@ -1,0 +1,96 @@
+# Quickstart
+
+This takes about five minutes and needs no accounts or external services.
+
+## 1. Get the binary
+
+Install the latest release on Linux or macOS:
+
+```bash
+curl -fsSL https://github.com/amareshhebbar/rungated/releases/latest/download/install.sh | sh
+```
+
+Or build from source with Go 1.24 or newer:
+
+```bash
+go build -o bin/rungated ./cmd/rungated
+./bin/rungated version
+```
+
+Or use the container image:
+
+```bash
+docker run --rm -p 8080:8080 -p 8081:8081 ghcr.io/amareshhebbar/rungated:latest serve --dev
+```
+
+## 2. Start the gateway in development mode
+
+```bash
+./bin/rungated serve --dev
+```
+
+Development mode turns authentication off and registers the example agent in `spec/ats/examples`. Use it on your own machine only.
+
+* Console and API: [http://localhost:8080](http://localhost:8080)
+* Egress proxy: `localhost:8081`
+
+## 3. Make a decision
+
+Ask the gateway whether an agent may call a tool:
+
+```bash
+curl -s -X POST localhost:8080/v1/decide \
+  -H 'content-type: application/json' \
+  -d '{"agent_id":"finance-agent","kind":"tool.call","tool":"get_invoice","server":"finance-mcp","args":{"invoice_id":"INV-000123"}}'
+```
+
+The response has `verdict` set to `allow`. Now try a tool the agent is not allowed to use:
+
+```bash
+curl -s -X POST localhost:8080/v1/decide \
+  -H 'content-type: application/json' \
+  -d '{"agent_id":"finance-agent","kind":"tool.call","tool":"wipe_database"}'
+```
+
+The verdict is `block`, with the reason in `reasons`.
+
+## 4. Watch it live
+
+Open [http://localhost:8080](http://localhost:8080) and go to **Live**. Or stream events in a terminal:
+
+```bash
+curl -N localhost:8080/v1/events/stream
+```
+
+## 5. Point a model client at the gateway
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8080/llm/openai/v1",
+    api_key="unused",
+    default_headers={"X-Rungated-Agent": "finance-agent", "X-Rungated-Session": "run-1"},
+)
+```
+
+Set `OPENAI_API_KEY` in the gateway's environment so it can reach the provider. Every response carries `X-Rungated-Verdict` and `X-Rungated-Score` headers.
+
+## 6. Add a model
+
+Rules catch known patterns. Add a free model to catch paraphrased and translated attacks too:
+
+```bash
+export RUNGATED_CLOUD_API_KEY=rk_your_key
+export RUNGATED_CLOUD_EMBEDDER=rungated-embed-mini
+./bin/rungated serve --dev
+```
+
+Or run it on your own machine, see [Models](models/overview.md).
+
+## Next
+
+* Ten minute guides: [LangGraph](guides/langgraph.md), [OpenAI Agents SDK](guides/openai_agents.md), [Vercel AI SDK](guides/vercel_ai_sdk.md), [write the rulebook from traffic](guides/learn_rulebook.md)
+* Write a manifest for your own agent: [Manifest reference](reference/manifest.md)
+* Wrap your tools: [Python SDK](connect/python_sdk.md), [TypeScript SDK](connect/typescript_sdk.md)
+* Run it for real: [Docker](self_hosting/docker.md), [Kubernetes](self_hosting/kubernetes.md)

@@ -1,0 +1,39 @@
+# Decision API
+
+Use `POST /v1/decide` when you want a verdict without the SDK or a proxy.
+
+## Request
+
+```json
+{
+  "agent_id": "finance-agent",
+  "session_id": "run-42",
+  "kind": "tool.call",
+  "tool": "get_invoice",
+  "server": "finance-mcp",
+  "args": {"invoice_id": "INV-000123"},
+  "texts": [{"source": "user", "text": "Show me invoice 123"}]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `agent_id` | Registered agent |
+| `session_id` | Groups actions for loop and cost limits |
+| `kind` | The kind of action, for example `tool.call` |
+| `tool`, `server`, `method`, `args` | Tool call details |
+| `texts` | Text to scan, each with a `source` |
+| `host`, `url` | Network target |
+| `model`, `provider` | LLM details |
+
+## Response
+
+```json
+{"verdict": "allow", "computed": "allow", "score": 4, "latency_us": 310, "findings": []}
+```
+
+`verdict` is what to enforce. `computed` is what the pipeline decided before the agent's autonomy mode adjusted it. See [Concepts](../concepts.md).
+
+## Authentication
+
+When agent authentication is on, send `X-Rungated-Token` (an `rgt1.` token) or `X-Rungated-Key` (an `rgk_` key).

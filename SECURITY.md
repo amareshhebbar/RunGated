@@ -14,4 +14,4 @@ You will get a reply within three working days. We will agree on a disclosure da
 
 In scope: the gateway, the proxies, the Console, the SDKs and the release artifacts in this repository.
 
-Bypasses of a detector are welcome as reports, but they are expected: Rungated detects known patterns and enforces the rules you declare. It does not claim to stop every prompt injection. See `docs/security/limits.mdx`.
+Bypasses of a detector are welcome as reports, but they are expected: Rungated detects known patterns and enforces the rules you declare. It does not claim to stop every prompt injection. See `docs/security/limits.md`.

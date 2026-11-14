@@ -24,6 +24,16 @@ jobs:
       - run: go vet ./...
       - run: go test -race ./...
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r "$(test -f docs/site/requirements.txt && echo docs/site/requirements.txt || echo docs/requirements.txt)"
+      - run: mkdocs build --strict -f mkdocs.yml
+
   bench:
     runs-on: ubuntu-latest
     steps:

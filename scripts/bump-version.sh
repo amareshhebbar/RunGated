@@ -32,7 +32,7 @@ sed -i "s/^version: $OLDRE/version: $NEW/; s/^appVersion: \"$OLDRE\"/appVersion:
 sed -i "s/\"Version\": \"$OLDRE\", \"AppVersion\": \"$OLDRE\"/\"Version\": \"$NEW\", \"AppVersion\": \"$NEW\"/; s#rungated:$OLDRE#rungated:$NEW#g" deploy/helm/chart_test.go
 [ -f ] && sed -i "s/VERSION:-$OLDRE/VERSION:-$NEW/"
 
-for f in docs/self_hosting/kubernetes.mdx docs/enterprise/airgap.mdx; do
+for f in docs/self_hosting/kubernetes.md docs/enterprise/airgap.md; do
   [ -f "$f" ] && sed -i "s/$OLDRE/$NEW/g" "$f"
 done
 

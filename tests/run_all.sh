@@ -53,12 +53,10 @@ if [ -f mkdocs.public.yml ] && command -v mkdocs >/dev/null 2>&1; then
 elif [ -f mkdocs.public.yml ]; then
   skip "docs build" "pip install -r docs/requirements.txt"
 fi
-DOCS_DIR=docs/mintlify
-[ -f docs/docs.json ] && DOCS_DIR=docs
-if [ -f "$DOCS_DIR/docs.json" ] && command -v mint >/dev/null 2>&1; then
-  run "mintlify docs links" bash -c "cd $DOCS_DIR && mint broken-links"
-elif [ -f "$DOCS_DIR/docs.json" ]; then
-  skip "mintlify docs links" "npm i -g mint"
+if [ -f mkdocs.yml ] && command -v mkdocs >/dev/null 2>&1; then
+  run "docs strict build" mkdocs build --strict -q -f mkdocs.yml -d "$(mktemp -d)"
+elif [ -f mkdocs.yml ]; then
+  skip "docs strict build" "pip install -r docs/site/requirements.txt or docs/requirements.txt"
 fi
 
 if [ -z "${ORT_LIB:-}" ] && [ -f "$HOME/.local/share/rungated/onnxruntime/lib/libonnxruntime.so" ]; then

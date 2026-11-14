@@ -1,0 +1,134 @@
+site_name: Rungated
+site_description: Runtime security gateway for AI agents
+site_url: !ENV [READTHEDOCS_CANONICAL_URL, "https://rungated.readthedocs.io/"]
+repo_url: https://github.com/amareshhebbar/RunGated
+repo_name: amareshhebbar/RunGated
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+strict: true
+copyright: Rungated is open source under Apache 2.0
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+extra_css:
+  - assets/extra.css
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/amareshhebbar/RunGated
+    - icon: material/email-outline
+      link: mailto:hebbar.gvamaresh@gmail.com
+
+plugins:
+  - search
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Start:
+      - Quickstart: quickstart.md
+      - How it works: concepts.md
+      - Free and Enterprise: editions.md
+  - Guides:
+      - Agent frameworks:
+          - LangGraph: guides/langgraph.md
+          - OpenAI Agents SDK: guides/openai_agents.md
+          - Vercel AI SDK: guides/vercel_ai_sdk.md
+          - Learn the rulebook: guides/learn_rulebook.md
+      - Connect:
+          - LLM proxy: connect/llm_proxy.md
+          - MCP proxy: connect/mcp.md
+          - Egress proxy: connect/egress.md
+          - Decision API: connect/decision_api.md
+          - Python SDK: connect/python_sdk.md
+          - TypeScript SDK: connect/typescript_sdk.md
+  - Models:
+      - Overview: models/overview.md
+      - Run locally: models/local.md
+      - Hosted models: models/hosted.md
+      - Your own model: models/your_own.md
+  - Operate:
+      - Self hosting:
+          - Docker: self_hosting/docker.md
+          - Kubernetes: self_hosting/kubernetes.md
+          - Configuration: self_hosting/configuration.md
+          - Operations: self_hosting/operations.md
+      - Security:
+          - Data handling: security/data_handling.md
+          - Failure modes: security/failure_modes.md
+          - Limits: security/limits.md
+  - Enterprise:
+      - Overview: enterprise/overview.md
+      - Slack approvals: enterprise/slack.md
+      - Air gapped install: enterprise/airgap.md
+  - Reference:
+      - CLI: reference/cli.md
+      - API: reference/api.md
+      - Agent manifest: reference/manifest.md
+      - FAQ: faq.md
+      - Changelog: changelog.md
