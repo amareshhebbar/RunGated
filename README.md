@@ -1,5 +1,6 @@
 # Rungated
 
+[![M8ven Verified](https://m8ven.ai/badge/mcp/amareshhebbar-rungated-1f6yfb?variant=verified)](https://m8ven.ai/mcp/amareshhebbar-rungated-1f6yfb?s=readme)
 Runtime security gateway for AI agents. Every model call, tool call and outbound request your agent makes goes through Rungated. It checks the action against the rules you wrote for that agent, scores the risk, and then allows, warns, redacts, holds for a human, blocks or contains it.
 
 One Go binary. No accounts, no external services, Apache 2.0.
